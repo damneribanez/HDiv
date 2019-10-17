@@ -49,7 +49,7 @@ public:
     virtual void SetDimension(int dim) { m_dim = dim; }
     
     /// Returns number of state variables
-    virtual int NStateVariables() const override { return 1; }
+    virtual int NStateVariables() const  { return 1; }
     
     /// Creates another material of the same type
     virtual TPZMaterial *NewMaterial() override

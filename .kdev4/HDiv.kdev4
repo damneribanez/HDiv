@@ -1,0 +1,19 @@
+[Buildset]
+BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
+
+[CMake]
+Build Directory Count=1
+Current Build Directory Index-Host System=0
+
+[CMake][CMake Build Directory 0]
+Build Directory Path=/home/dammer/Documentos/Github/HDiv_build
+Build Type=Debug
+CMake Binary=/usr/local/bin/cmake
+CMake Executable=/usr/local/bin/cmake
+Environment Profile=
+Extra Arguments=
+Install Directory=/usr/local
+Runtime=Host System
+
+[Project]
+VersionControlSupport=kdevgit

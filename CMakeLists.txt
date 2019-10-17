@@ -15,9 +15,9 @@ ENDIF (WIN32)
 
 include_directories(${PZ_INCLUDE_DIRS})
 
-if(NOT ${PZ_USING_MKL})
-   MESSAGE(FATAL_ERROR "Found a PZ library not configured with Intel MKL library. SBFem needs PZ configured with MKL library to work!")
-endif()
+#if(NOT ${PZ_USING_MKL})
+#   MESSAGE(FATAL_ERROR "Found a PZ library not configured with Intel MKL library. SBFem needs PZ configured with MKL library to work!")
+#endif()
 
 IF(APPLE)
    # Mac OS X specific code
@@ -60,15 +60,15 @@ else()
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")#this flag is for preventing errors when casting from double to float
 endif()
 
-add_subdirectory(HDiv2D)
-add_subdirectory(HDiv3D)
-add_subdirectory(HDivEstabHHetero)
-add_subdirectory(HDivEstabilizado)
-add_subdirectory(HDiv_demo)
-add_subdirectory(Hdiv3DCurved)
-add_subdirectory(HdivPressureTeste)
+#add_subdirectory(HDiv2D)
+#add_subdirectory(HDiv3D)
+#add_subdirectory(HDivEstabHHetero)
+#add_subdirectory(HDivEstabilizado)
+#add_subdirectory(HDiv_demo)
+#add_subdirectory(Hdiv3DCurved)
+#add_subdirectory(HdivPressureTeste)
 add_subdirectory(HDiv_Benchmarks)
-add_subdirectory(HDiv_Benchmarks_II)
+#add_subdirectory(HDiv_Benchmarks_II)
 #Enabling nightly tests
 ENABLE_TESTING()
 include(CTest)
