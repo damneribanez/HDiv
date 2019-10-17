@@ -337,7 +337,7 @@ void CreateDFN::BuildFracturesAproxSpace(int p_order, int target_dim, TPZCompMes
     }
     
     
-    /// create boundary elements for the 2d fractures
+    /// create boundary elements for the 2d and 1d fractures
     
     TPZCompMesh * flux_cmesh = dfn_mixed_mesh_vec[0];
     flux_cmesh->Reference()->ResetReference();
@@ -375,6 +375,7 @@ void CreateDFN::BuildFracturesAproxSpace(int p_order, int target_dim, TPZCompMes
                     
                     int bc_fracture_id;
                     if (target_dim == 2) {
+                        std::cout<<"entré"<<std::endl;
                         bc_fracture_id = m_bc_ids_1d[bc_mat_id];
                         val2(0,0) = bc_value;
                         if (!flux_cmesh->FindMaterial(bc_fracture_id)) {
@@ -407,6 +408,7 @@ void CreateDFN::BuildFracturesAproxSpace(int p_order, int target_dim, TPZCompMes
     
     /// Insert fractures intersections with 3D bc
     TPZGeoMesh * geometry = flux_cmesh->Reference();
+    geometry->SetDimension(target_dim);
     switch (target_dim) {
         case 2:
         {
@@ -781,6 +783,8 @@ TPZCompMesh * CreateDFN::CreateDFNCmesh(TPZMultiphysicsCompMesh * mp_initial_cme
     TPZManVector<TPZCompMesh *> mp_mesh_vector = mp_initial_cmesh->MeshVector();
     TPZCompMesh * q_mesh = mp_mesh_vector[0];
     TPZCompMesh * p_mesh = mp_mesh_vector[1];
+    q_mesh->SetDimModel(2);
+    q_mesh->Reference()->SetDimension(2);
     int order = 1;
     std::ofstream file1("p_sides.vtk");
     TPZVTKGeoMesh::PrintCMeshVTK(p_mesh, file1);
@@ -795,10 +799,14 @@ TPZCompMesh * CreateDFN::CreateDFNCmesh(TPZMultiphysicsCompMesh * mp_initial_cme
     TPZVTKGeoMesh::PrintCMeshVTK(p_mesh, file3);
     std::ofstream file4("q_Hybrid_internal_sides.vtk");
     TPZVTKGeoMesh::PrintCMeshVTK(q_mesh, file4);
-    
-    for (int dim = 2; dim > 0; dim--) {
+ 
+
+    for (int dim = 2; dim > 1; dim--) {
+        std::cout<<"dim: "<<dim<<std::endl;
+         hybrid.HybridizeInternalSides(mp_initial_cmesh->MeshVector());
         BuildFracturesAproxSpace(order, dim, mp_initial_cmesh, fHDivWrapMatid, fLagrangeInterface, fflux_resistivity_id, fInterfaceMatid);
         hybrid.HybridizeInternalSides(mp_initial_cmesh->MeshVector());
+
         std::ofstream file5("geometry_new.vtk");
         TPZVTKGeoMesh::PrintGMeshVTK(p_mesh->Reference(), file5);
         std::ofstream file3("p_Hybrid_int_build.vtk");
@@ -807,21 +815,20 @@ TPZCompMesh * CreateDFN::CreateDFNCmesh(TPZMultiphysicsCompMesh * mp_initial_cme
         TPZVTKGeoMesh::PrintCMeshVTK(q_mesh, file4);
         std::ofstream file6("pressure.txt");
         p_mesh->Print(file6);
-     
+
     }
-     
     /// Computational multiphysics mesh reconstruction
     TPZVec<int> & active_approx_spaces = ExtractActiveApproxSpaces(mp_initial_cmesh);
     TPZCompMesh * dfn_hybrid_cmesh = DuplicateMultiphysicsCMeshMaterials(mp_initial_cmesh);
     CleanUpMultiphysicsCMesh(mp_initial_cmesh);
     
-    int target_dim=3;
-    int fractures_dim =2;
-    int fractures_intersections_dim =1;
+    int target_dim=2;
+    int fractures_dim =1;
+    int fractures_intersections_dim =0;
     InsertMaterialsForHibridization(target_dim, dfn_hybrid_cmesh, fHDivWrapMatid, fLagrangeInterface, fflux_resistivity_id, fInterfaceMatid);
     InsertMaterialsForMixedOperatorOnFractures(fractures_dim,dfn_hybrid_cmesh);
     InsertMaterialsForMixedOperatorOnFractures(fractures_intersections_dim,dfn_hybrid_cmesh);
-     InsertMaterialsForMixedOperatorOnFractures(0,dfn_hybrid_cmesh);
+    InsertMaterialsForMixedOperatorOnFractures(0,dfn_hybrid_cmesh);
     
     
     TPZManVector<TPZMaterial *> zeroDimMat(m_fracture_ids[0].size());
@@ -839,7 +846,7 @@ TPZCompMesh * CreateDFN::CreateDFNCmesh(TPZMultiphysicsCompMesh * mp_initial_cme
   
     CreateAllInterfaceElements(fInterfaceMatid, dfn_hybrid_cmesh, mp_mesh_vector);
     dfn_hybrid_cmesh->ComputeNodElCon();
-  //  CheckODElements(dfn_hybrid_cmesh);
+    CheckODElements(dfn_hybrid_cmesh);
 
     dfn_hybrid_cmesh->InitializeBlock();
     return dfn_hybrid_cmesh;
